@@ -1,6 +1,6 @@
 # CRA Maturity Assessment Tool
 
-A comprehensive web-based tool for assessing Cyber Resilience Act (CRA) compliance against Annex I requirements. This pure frontend application uses localStorage for data persistence and supports JSON/YAML export.
+A comprehensive web-based tool for assessing Cyber Resilience Act (CRA) compliance against Annex I requirements. This pure frontend application uses localStorage for data persistence and supports JSON export.
 
 ## Features
 
@@ -22,7 +22,6 @@ A comprehensive web-based tool for assessing Cyber Resilience Act (CRA) complian
 ### Data Management
 - **Local Storage**: All data is automatically saved to browser localStorage
 - **JSON Export**: Export assessments as formatted JSON files
-- **YAML Export**: Export assessments as YAML files for better readability
 - **Import/Export**: Load previous assessments or import from external files
 - **Multiple Assessments**: Manage and switch between different product assessments
 
@@ -33,7 +32,7 @@ A comprehensive web-based tool for assessing Cyber Resilience Act (CRA) complian
 3. **Enter Product Info**: Fill in product name, assessment date, and assessor details
 4. **Assess Requirements**: Navigate to Part I and Part II sections to assess each requirement
 5. **Save Progress**: Data auto-saves to localStorage, or click "Save Assessment"
-6. **Export Results**: Use JSON or YAML export buttons to save your assessment
+6. **Export Results**: Use the JSON export button to save your assessment
 
 ## Assessment Workflow
 
@@ -136,22 +135,6 @@ Each requirement includes detailed criteria for each maturity level to ensure co
     }
   }
 }
-```
-
-### YAML Export
-```yaml
-productName: Your Product
-assessmentDate: "2026-05-07"
-assessorName: Your Name
-requirements:
-  I.1:
-    currentLevel: 2
-    targetLevel: 4
-    evidence:
-      - Risk assessment report
-    gaps:
-      - No formal process
-    improvementNotes: Implement formal risk assessment process
 ```
 
 ## Security Notes
