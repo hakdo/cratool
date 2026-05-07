@@ -14,7 +14,6 @@ function initApp() {
     loadAssessments();
     setupEventListeners();
     renderRequirements();
-    populateActionRequirementSelect();
     updateQuickStats();
     renderSummary();
     renderCharts();
@@ -167,10 +166,14 @@ function setupEventListeners() {
     // Load Modal
     document.getElementById('loadSelectedBtn').addEventListener('click', loadSelectedAssessment);
     
-    // Action Form
-    document.getElementById('addActionBtn').addEventListener('click', showActionForm);
-    document.getElementById('actionForm').addEventListener('submit', saveAction);
-    document.getElementById('cancelActionBtn').addEventListener('click', hideActionForm);
+    // Action Modal
+    document.getElementById('addActionBtn').addEventListener('click', () => showActionModal(null));
+    document.getElementById('saveActionModalBtn').addEventListener('click', saveActionFromModal);
+    document.getElementById('deleteActionModalBtn').addEventListener('click', () => {
+        if (AppState.editingAction) {
+            confirmDeleteAction(AppState.editingAction.id);
+        }
+    });
     
     // Close modals on outside click
     document.querySelectorAll('.modal').forEach(modal => {
