@@ -439,8 +439,7 @@ function showActionModal(actionId) {
     // Add event listener for requirement change (remove old one first to avoid duplicates)
     const requirementSelect = document.getElementById('modalActionRequirement');
     requirementSelect.onchange = null;
-    requirementSelect.removeEventListener('change', updateLevelsFromAssessment);
-    requirementSelect.addEventListener('change', updateLevelsFromAssessment);
+    requirementSelect.onchange = updateLevelsFromAssessment;
     
     if (actionId) {
         // Editing existing action
