@@ -223,3 +223,6 @@ function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+
+// Initialize the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', initApp);
