@@ -392,7 +392,9 @@ const ACTION_FIELD_LIMITS = {
 };
 
 const ACTION_PRIORITIES = ['urgent', 'high', 'medium', 'low'];
+const MAX_ACTION_MATURITY_LEVEL = 4;
 
+// Remove non-printable ASCII control characters before storing or re-displaying action text.
 function sanitizeActionText(value) {
     return String(value || '')
         .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
@@ -414,7 +416,7 @@ function getValidatedActionTextField(elementId, label, maxLength) {
 
 function getValidatedActionLevel(elementId, label) {
     const value = parseInt(document.getElementById(elementId).value, 10);
-    if (!Number.isInteger(value) || value < 0 || value > 4) {
+    if (!Number.isInteger(value) || value < 0 || value > MAX_ACTION_MATURITY_LEVEL) {
         alert(`Please select a valid ${label}.`);
         return null;
     }
@@ -503,11 +505,22 @@ function saveActionFromModal() {
     const priority = document.getElementById('modalActionPriority').value;
     const requirementId = sanitizeActionText(document.getElementById('modalActionRequirement').value);
     const currentLevel = getValidatedActionLevel('modalActionCurrentLevel', 'current level');
+    if (currentLevel === null) return;
+
     const targetLevel = getValidatedActionLevel('modalActionTargetLevel', 'target level');
+    if (targetLevel === null) return;
+
     const description = getValidatedActionTextField('modalActionDescription', 'Action description', ACTION_FIELD_LIMITS.description);
+    if (description === null) return;
+
     const owner = getValidatedActionTextField('modalActionOwner', 'Owner', ACTION_FIELD_LIMITS.owner);
+    if (owner === null) return;
+
     const timeline = getValidatedActionTextField('modalActionTimeline', 'Timeline', ACTION_FIELD_LIMITS.timeline);
+    if (timeline === null) return;
+
     const resources = getValidatedActionTextField('modalActionResources', 'Resources', ACTION_FIELD_LIMITS.resources);
+    if (resources === null) return;
     
     if (!requirementId) {
         alert('Please select a requirement');
@@ -521,10 +534,6 @@ function saveActionFromModal() {
 
     if (!isValidActionRequirementId(requirementId)) {
         alert('Please select a valid requirement.');
-        return;
-    }
-
-    if ([currentLevel, targetLevel, description, owner, timeline, resources].includes(null)) {
         return;
     }
     
