@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRA Maturity Assessment Tool</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>CRA Maturity Assessment Tool</h1>
+                <p class="subtitle">Cyber Resilience Act - Annex I Compliance Assessment</p>
+            </div>
+            <div class="header-actions">
+                <button id="saveBtn" class="btn btn-primary">Save Assessment</button>
+                <button id="exportJsonBtn" class="btn btn-secondary">Export JSON</button>
+                <button id="exportYamlBtn" class="btn btn-secondary">Export YAML</button>
+                <button id="loadBtn" class="btn btn-secondary">Load Assessment</button>
+                <button id="importBtn" class="btn btn-secondary" onclick="document.getElementById('fileInput').click()">Import File</button>
+                <button id="newBtn" class="btn btn-danger">New Assessment</button>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="nav-tabs">
+            <button class="nav-tab active" data-section="overview">Overview</button>
+            <button class="nav-tab" data-section="part1">Part I: Product Properties</button>
+            <button class="nav-tab" data-section="part2">Part II: Process Requirements</button>
+            <button class="nav-tab" data-section="summary">Summary & Analysis</button>
+            <button class="nav-tab" data-section="roadmap">Improvement Roadmap</button>
+            <button class="nav-tab" data-section="history">Assessment History</button>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Overview Section -->
+            <section id="overview" class="section active">
+                <div class="section-header">
+                    <h2>Assessment Overview</h2>
+                    <p>Interactive maturity assessment tool for Cyber Resilience Act compliance</p>
+                </div>
+                
+                <div class="overview-grid">
+                    <div class="card">
+                        <h3>Assessment Information</h3>
+                        <form id="assessmentInfoForm">
+                            <div class="form-group">
+                                <label for="productName">Product Name</label>
+                                <input type="text" id="productName" placeholder="Enter product name">
+                            </div>
+                            <div class="form-group">
+                                <label for="assessmentDate">Assessment Date</label>
+                                <input type="date" id="assessmentDate">
+                            </div>
+                            <div class="form-group">
+                                <label for="assessorName">Assessor Name</label>
+                                <input type="text" id="assessorName" placeholder="Enter assessor name">
+                            </div>
+                            <div class="form-group">
+                                <label for="assessmentNotes">General Notes</label>
+                                <textarea id="assessmentNotes" placeholder="Enter any general notes about this assessment"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Maturity Level Guide</h3>
+                        <div class="maturity-levels">
+                            <div class="maturity-level" data-level="0">
+                                <span class="level-badge level-0">0</span>
+                                <strong>Non-existent</strong>
+                                <p>No awareness or implementation</p>
+                            </div>
+                            <div class="maturity-level" data-level="1">
+                                <span class="level-badge level-1">1</span>
+                                <strong>Initial</strong>
+                                <p>Ad-hoc implementation</p>
+                            </div>
+                            <div class="maturity-level" data-level="2">
+                                <span class="level-badge level-2">2</span>
+                                <strong>Managed</strong>
+                                <p>Basic processes in place</p>
+                            </div>
+                            <div class="maturity-level" data-level="3">
+                                <span class="level-badge level-3">3</span>
+                                <strong>Defined</strong>
+                                <p>Formal, standardized processes</p>
+                            </div>
+                            <div class="maturity-level" data-level="4">
+                                <span class="level-badge level-4">4</span>
+                                <strong>Optimized</strong>
+                                <p>Continuous improvement</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Quick Stats</h3>
+                        <div class="quick-stats" id="quickStats">
+                            <div class="stat-item">
+                                <span class="stat-label">Overall Score:</span>
+                                <span class="stat-value" id="overallScore">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Part I Average:</span>
+                                <span class="stat-value" id="part1Avg">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Part II Average:</span>
+                                <span class="stat-value" id="part2Avg">-</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Requirements Assessed:</span>
+                                <span class="stat-value" id="assessedCount">0/15</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Assessment Instructions</h3>
+                    <div class="instructions">
+                        <div class="instruction-step">
+                            <span class="step-number">1</span>
+                            <div class="step-content">
+                                <strong>Prepare</strong>
+                                <p>Gather relevant documentation for each product. Identify subject matter experts for each requirement area. Allocate 2-4 hours for initial assessment.</p>
+                            </div>
+                        </div>
+                        <div class="instruction-step">
+                            <span class="step-number">2</span>
+                            <div class="step-content">
+                                <strong>Assess</strong>
+                                <p>Review each requirement and its assessment criteria. Select the maturity level that best describes your current state. Document evidence that supports your rating.</p>
+                            </div>
+                        </div>
+                        <div class="instruction-step">
+                            <span class="step-number">3</span>
+                            <div class="step-content">
+                                <strong>Analyze</strong>
+                                <p>Review maturity scores across all requirements. Identify patterns and priority areas. Calculate overall maturity score.</p>
+                            </div>
+                        </div>
+                        <div class="instruction-step">
+                            <span class="step-number">4</span>
+                            <div class="step-content">
+                                <strong>Validate</strong>
+                                <p>Conduct peer review of assessments. Validate with evidence review. Obtain stakeholder sign-off.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part I: Product Properties -->
+            <section id="part1" class="section">
+                <div class="section-header">
+                    <h2>Part I: Product Properties Assessment</h2>
+                    <p>Assess product properties against Annex I requirements</p>
+                </div>
+                
+                <div class="requirements-grid" id="part1Requirements">
+                    <!-- Requirements will be dynamically inserted here -->
+                </div>
+            </section>
+
+            <!-- Part II: Process Requirements -->
+            <section id="part2" class="section">
+                <div class="section-header">
+                    <h2>Part II: Process Requirements Assessment</h2>
+                    <p>Assess process requirements against Annex I requirements</p>
+                </div>
+                
+                <div class="requirements-grid" id="part2Requirements">
+                    <!-- Requirements will be dynamically inserted here -->
+                </div>
+            </section>
+
+            <!-- Summary Section -->
+            <section id="summary" class="section">
+                <div class="section-header">
+                    <h2>Assessment Summary</h2>
+                    <p>Maturity score calculation and analysis</p>
+                </div>
+                
+                <div class="summary-grid">
+                    <div class="card">
+                        <h3>Maturity Score Table</h3>
+                        <div class="table-container">
+                            <table id="summaryTable">
+                                <thead>
+                                    <tr>
+                                        <th>Requirement</th>
+                                        <th>Current Level</th>
+                                        <th>Target Level</th>
+                                        <th>Gap</th>
+                                        <th>Priority</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="summaryTableBody">
+                                    <!-- Summary data will be inserted here -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Part I Average</th>
+                                        <td id="summaryPart1Avg">-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Part II Average</th>
+                                        <td id="summaryPart2Avg">-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Overall Average</th>
+                                        <td id="summaryOverallAvg">-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                        <td>-</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Maturity Profile</h3>
+                        <div class="chart-container">
+                            <canvas id="maturityChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Maturity Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="distributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Scoring Guide</h3>
+                    <div class="scoring-guide">
+                        <h4>General Scoring Principles</h4>
+                        <ol>
+                            <li><strong>Evidence-Based:</strong> Ratings must be supported by documented evidence</li>
+                            <li><strong>Consistent:</strong> Use same criteria across all assessments</li>
+                            <li><strong>Honest:</strong> Rate actual state, not aspirational state</li>
+                            <li><strong>Defensible:</strong> Be prepared to justify ratings to auditors</li>
+                        </ol>
+                        
+                        <h4>Level-Specific Criteria</h4>
+                        <div class="level-criteria">
+                            <div class="criteria-item">
+                                <span class="level-badge level-0">0</span>
+                                <strong>Non-existent:</strong>
+                                <ul>
+                                    <li>No awareness of the requirement</li>
+                                    <li>No processes or controls implemented</li>
+                                    <li>No documentation exists</li>
+                                    <li>No plans to address</li>
+                                </ul>
+                            </div>
+                            <div class="criteria-item">
+                                <span class="level-badge level-1">1</span>
+                                <strong>Initial:</strong>
+                                <ul>
+                                    <li>Basic awareness of the requirement</li>
+                                    <li>Ad-hoc or informal implementation</li>
+                                    <li>Minimal or no documentation</li>
+                                    <li>Reactive approach</li>
+                                    <li>Success depends on individual efforts</li>
+                                </ul>
+                            </div>
+                            <div class="criteria-item">
+                                <span class="level-badge level-2">2</span>
+                                <strong>Managed:</strong>
+                                <ul>
+                                    <li>Basic processes exist</li>
+                                    <li>Some documentation available</li>
+                                    <li>Processes are repeatable</li>
+                                    <li>Basic measurements in place</li>
+                                    <li>Some training provided</li>
+                                </ul>
+                            </div>
+                            <div class="criteria-item">
+                                <span class="level-badge level-3">3</span>
+                                <strong>Defined:</strong>
+                                <ul>
+                                    <li>Formal, documented processes</li>
+                                    <li>Standardized across organization</li>
+                                    <li>Proactive approach</li>
+                                    <li>Performance measured</li>
+                                    <li>Continuous improvement activities</li>
+                                    <li>Full training coverage</li>
+                                </ul>
+                            </div>
+                            <div class="criteria-item">
+                                <span class="level-badge level-4">4</span>
+                                <strong>Optimized:</strong>
+                                <ul>
+                                    <li>Best practices implemented</li>
+                                    <li>Processes automated where possible</li>
+                                    <li>Continuous monitoring</li>
+                                    <li>Benchmarking against industry</li>
+                                    <li>Innovation and optimization</li>
+                                    <li>Culture of security excellence</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Roadmap Section -->
+            <section id="roadmap" class="section">
+                <div class="section-header">
+                    <h2>Improvement Roadmap</h2>
+                    <p>Priority matrix and recommended actions</p>
+                </div>
+                
+                <div class="roadmap-grid">
+                    <div class="card">
+                        <h3>Priority Matrix</h3>
+                        <div class="priority-matrix">
+                            <div class="matrix-quadrant urgent">
+                                <h4>Urgent</h4>
+                                <p>High Priority, Quick Wins</p>
+                                <ul id="urgentActions">
+                                    <li class="empty-message">No urgent actions identified</li>
+                                </ul>
+                            </div>
+                            <div class="matrix-quadrant high">
+                                <h4>High</h4>
+                                <p>High Priority, Medium Effort</p>
+                                <ul id="highActions">
+                                    <li class="empty-message">No high priority actions identified</li>
+                                </ul>
+                            </div>
+                            <div class="matrix-quadrant medium">
+                                <h4>Medium</h4>
+                                <p>Medium Priority</p>
+                                <ul id="mediumActions">
+                                    <li class="empty-message">No medium priority actions identified</li>
+                                </ul>
+                            </div>
+                            <div class="matrix-quadrant low">
+                                <h4>Low</h4>
+                                <p>Low Priority</p>
+                                <ul id="lowActions">
+                                    <li class="empty-message">No low priority actions identified</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3>Recommended Actions</h3>
+                        <div class="table-container">
+                            <table id="actionsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Priority</th>
+                                        <th>Requirement</th>
+                                        <th>Current Level</th>
+                                        <th>Target Level</th>
+                                        <th>Action</th>
+                                        <th>Timeline</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="actionsTableBody">
+                                    <tr>
+                                        <td colspan="6" class="empty-message">No actions defined yet</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <button id="addActionBtn" class="btn btn-primary">Add Action</button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Action Item Form</h3>
+                    <form id="actionForm" class="action-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="actionPriority">Priority</label>
+                                <select id="actionPriority">
+                                    <option value="urgent">Urgent</option>
+                                    <option value="high">High</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="actionRequirement">Requirement</label>
+                                <select id="actionRequirement">
+                                    <option value="">Select Requirement</option>
+                                    <!-- Will be populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="actionCurrentLevel">Current Level</label>
+                                <select id="actionCurrentLevel">
+                                    <option value="0">0 - Non-existent</option>
+                                    <option value="1">1 - Initial</option>
+                                    <option value="2">2 - Managed</option>
+                                    <option value="3">3 - Defined</option>
+                                    <option value="4">4 - Optimized</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="actionTargetLevel">Target Level</label>
+                                <select id="actionTargetLevel">
+                                    <option value="0">0 - Non-existent</option>
+                                    <option value="1">1 - Initial</option>
+                                    <option value="2">2 - Managed</option>
+                                    <option value="3">3 - Defined</option>
+                                    <option value="4">4 - Optimized</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="actionDescription">Action Description</label>
+                            <textarea id="actionDescription" placeholder="Describe the action to be taken"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="actionOwner">Owner</label>
+                                <input type="text" id="actionOwner" placeholder="Who is responsible?">
+                            </div>
+                            <div class="form-group">
+                                <label for="actionTimeline">Timeline</label>
+                                <input type="text" id="actionTimeline" placeholder="e.g., 3-6 months">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="actionResources">Resources Required</label>
+                            <input type="text" id="actionResources" placeholder="What resources are needed?">
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Action</button>
+                            <button type="button" id="cancelActionBtn" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- History Section -->
+            <section id="history" class="section">
+                <div class="section-header">
+                    <h2>Assessment History</h2>
+                    <p>Track and manage previous assessments</p>
+                </div>
+                
+                <div class="card">
+                    <h3>Previous Assessments</h3>
+                    <div class="table-container">
+                        <table id="historyTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Product</th>
+                                    <th>Assessor</th>
+                                    <th>Overall Score</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <tr>
+                                    <td colspan="6" class="empty-message">No previous assessments found</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>Validation Checklist</h3>
+                    <div class="validation-checklist">
+                        <h4>Before Finalizing Assessment:</h4>
+                        <ul>
+                            <li><input type="checkbox" id="checkAllAssessed"> All requirements assessed</li>
+                            <li><input type="checkbox" id="checkEvidence"> Evidence documented for each rating</li>
+                            <li><input type="checkbox" id="checkRatingsReviewed"> Ratings reviewed by subject matter experts</li>
+                            <li><input type="checkbox" id="checkPeerReview"> Peer review completed</li>
+                            <li><input type="checkbox" id="checkStakeholderSignoff"> Stakeholder sign-off obtained</li>
+                            <li><input type="checkbox" id="checkRoadmap"> Improvement roadmap developed</li>
+                            <li><input type="checkbox" id="checkArchived"> Assessment documentation archived</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>CRA Maturity Assessment Tool | Version 1.0 | Last Updated: May 7, 2026</p>
+            <p>Data is stored locally in your browser's localStorage. Export regularly for backup.</p>
+        </footer>
+    </div>
+
+    <!-- Requirement Detail Modal -->
+    <div id="requirementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Requirement Details</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Dynamic content -->
+            </div>
+            <div class="modal-footer">
+                <button id="saveModalBtn" class="btn btn-primary">Save Changes</button>
+                <button class="modal-close btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Assessment Modal -->
+    <div id="loadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Load Assessment</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Assessment to Load:</label>
+                    <select id="loadAssessmentSelect" class="form-control">
+                        <option value="">No assessments available</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="loadSelectedBtn" class="btn btn-primary">Load Selected</button>
+                <button class="modal-close btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Input for Import -->
+    <input type="file" id="fileInput" accept=".json,.yaml,.yml" style="display: none;">
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+    <script src="render.js"></script>
+    <script src="modals.js"></script>
+    <script src="export.js"></script>
+</body>
+</html>
