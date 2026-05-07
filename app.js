@@ -156,7 +156,6 @@ function setupEventListeners() {
     });
     
     document.getElementById('exportJsonBtn').addEventListener('click', exportToJson);
-    document.getElementById('exportYamlBtn').addEventListener('click', exportToYaml);
     document.getElementById('loadBtn').addEventListener('click', showLoadModal);
     document.getElementById('newBtn').addEventListener('click', confirmNewAssessment);
     

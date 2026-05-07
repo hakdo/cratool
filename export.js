@@ -1,8 +1,11 @@
-// CRA Maturity Assessment Tool - Export Functions
+// CRA Maturity Assessment Tool - Export/Import Functions
 
 // Export to JSON
 function exportToJson() {
-    if (!AppState.currentAssessment) return;
+    if (!AppState.currentAssessment) {
+        alert('No assessment to export. Please create or load an assessment first.');
+        return;
+    }
     
     const dataStr = JSON.stringify(AppState.currentAssessment, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -17,46 +20,7 @@ function exportToJson() {
     URL.revokeObjectURL(url);
 }
 
-// Export to YAML
-function exportToYaml() {
-    if (!AppState.currentAssessment) return;
-    
-    // Convert to YAML-compatible format
-    const assessmentData = {
-        productName: AppState.currentAssessment.productName || '',
-        assessmentDate: AppState.currentAssessment.assessmentDate || '',
-        assessorName: AppState.currentAssessment.assessorName || '',
-        assessmentNotes: AppState.currentAssessment.assessmentNotes || '',
-        requirements: {},
-        actions: AppState.currentAssessment.actions || []
-    };
-    
-    // Convert requirements
-    for (const [reqId, reqData] of Object.entries(AppState.currentAssessment.requirements)) {
-        assessmentData.requirements[reqId] = {
-            currentLevel: reqData.currentLevel,
-            targetLevel: reqData.targetLevel,
-            evidence: reqData.evidence || [],
-            gaps: reqData.gaps || [],
-            improvementNotes: reqData.improvementNotes || '',
-            lastUpdated: reqData.lastUpdated || null
-        };
-    }
-    
-    const yamlStr = jsyaml.dump(assessmentData);
-    const dataBlob = new Blob([yamlStr], { type: 'text/yaml' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `cra_assessment_${AppState.currentAssessment.productName || 'untitled'}_${new Date().toISOString().split('T')[0]}.yaml`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-}
-
-// Import from File
+// Import from JSON File
 function importFromFile(file) {
     const reader = new FileReader();
     
@@ -65,17 +29,18 @@ function importFromFile(file) {
             const content = e.target.result;
             let assessmentData;
             
-            // Try JSON first
+            // Parse as JSON
             try {
                 assessmentData = JSON.parse(content);
             } catch (e) {
-                // Try YAML
-                try {
-                    assessmentData = jsyaml.load(content);
-                } catch (e) {
-                    alert('Invalid file format. Please upload a valid JSON or YAML file.');
-                    return;
-                }
+                alert('Invalid file format. Please upload a valid JSON file.');
+                return;
+            }
+            
+            // Validate that it's an assessment object
+            if (!assessmentData || typeof assessmentData !== 'object') {
+                alert('Invalid assessment data. Please upload a valid assessment JSON file.');
+                return;
             }
             
             // Create new assessment from imported data
