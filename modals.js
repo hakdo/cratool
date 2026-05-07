@@ -394,7 +394,11 @@ const ACTION_FIELD_LIMITS = {
 const ACTION_PRIORITIES = ['urgent', 'high', 'medium', 'low'];
 const MAX_ACTION_MATURITY_LEVEL = 4;
 
-// Remove non-printable ASCII control characters before storing or re-displaying action text.
+/**
+ * Remove non-printable ASCII control characters (0x00-0x08, 0x0B, 0x0C, 0x0E-0x1F, and 0x7F)
+ * before storing or re-displaying action text so imported or persisted values cannot carry
+ * hidden control bytes into the UI state.
+ */
 function sanitizeActionText(value) {
     return String(value || '')
         .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
@@ -438,8 +442,10 @@ function showActionModal(actionId) {
     
     // Add event listener for requirement change (remove old one first to avoid duplicates)
     const requirementSelect = document.getElementById('modalActionRequirement');
+    // Clear the legacy property-based handler before managing the shared event listener.
     requirementSelect.onchange = null;
-    requirementSelect.onchange = updateLevelsFromAssessment;
+    requirementSelect.removeEventListener('change', updateLevelsFromAssessment);
+    requirementSelect.addEventListener('change', updateLevelsFromAssessment);
     
     if (actionId) {
         // Editing existing action
