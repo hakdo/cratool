@@ -384,6 +384,48 @@ function updateLevelsFromAssessment() {
     }
 }
 
+const ACTION_FIELD_LIMITS = {
+    description: 1000,
+    owner: 200,
+    timeline: 200,
+    resources: 500
+};
+
+const ACTION_PRIORITIES = ['urgent', 'high', 'medium', 'low'];
+
+function sanitizeActionText(value) {
+    return String(value || '')
+        .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '')
+        .trim();
+}
+
+function sanitizeActionTextForModal(value, maxLength) {
+    return sanitizeActionText(value).slice(0, maxLength);
+}
+
+function getValidatedActionTextField(elementId, label, maxLength) {
+    const value = sanitizeActionText(document.getElementById(elementId).value);
+    if (value.length > maxLength) {
+        alert(`${label} must be ${maxLength} characters or fewer.`);
+        return null;
+    }
+    return value;
+}
+
+function getValidatedActionLevel(elementId, label) {
+    const value = parseInt(document.getElementById(elementId).value, 10);
+    if (!Number.isInteger(value) || value < 0 || value > 4) {
+        alert(`Please select a valid ${label}.`);
+        return null;
+    }
+    return value;
+}
+
+function isValidActionRequirementId(requirementId) {
+    const allRequirements = [...RequirementsData.part1, ...RequirementsData.part2];
+    return allRequirements.some(req => req.id === requirementId);
+}
+
 // Show Action Modal
 function showActionModal(actionId) {
     const modal = document.getElementById('actionModal');
@@ -394,7 +436,8 @@ function showActionModal(actionId) {
     
     // Add event listener for requirement change (remove old one first to avoid duplicates)
     const requirementSelect = document.getElementById('modalActionRequirement');
-    requirementSelect.onchange = updateLevelsFromAssessment;
+    requirementSelect.removeEventListener('change', updateLevelsFromAssessment);
+    requirementSelect.addEventListener('change', updateLevelsFromAssessment);
     
     if (actionId) {
         // Editing existing action
@@ -420,10 +463,10 @@ function showActionModal(actionId) {
                     ? action.targetLevel 
                     : (inheritedTargetLevel !== null ? inheritedTargetLevel : 4);
             
-            document.getElementById('modalActionDescription').value = action.description;
-            document.getElementById('modalActionOwner').value = action.owner || '';
-            document.getElementById('modalActionTimeline').value = action.timeline || '';
-            document.getElementById('modalActionResources').value = action.resources || '';
+            document.getElementById('modalActionDescription').value = sanitizeActionTextForModal(action.description, ACTION_FIELD_LIMITS.description);
+            document.getElementById('modalActionOwner').value = sanitizeActionTextForModal(action.owner, ACTION_FIELD_LIMITS.owner);
+            document.getElementById('modalActionTimeline').value = sanitizeActionTextForModal(action.timeline, ACTION_FIELD_LIMITS.timeline);
+            document.getElementById('modalActionResources').value = sanitizeActionTextForModal(action.resources, ACTION_FIELD_LIMITS.resources);
             
             // Show delete button
             document.getElementById('deleteActionModalBtn').style.display = 'inline-block';
@@ -458,16 +501,30 @@ function saveActionFromModal() {
     if (!AppState.currentAssessment) return;
     
     const priority = document.getElementById('modalActionPriority').value;
-    const requirementId = document.getElementById('modalActionRequirement').value;
-    const currentLevel = parseInt(document.getElementById('modalActionCurrentLevel').value);
-    const targetLevel = parseInt(document.getElementById('modalActionTargetLevel').value);
-    const description = document.getElementById('modalActionDescription').value;
-    const owner = document.getElementById('modalActionOwner').value;
-    const timeline = document.getElementById('modalActionTimeline').value;
-    const resources = document.getElementById('modalActionResources').value;
+    const requirementId = sanitizeActionText(document.getElementById('modalActionRequirement').value);
+    const currentLevel = getValidatedActionLevel('modalActionCurrentLevel', 'current level');
+    const targetLevel = getValidatedActionLevel('modalActionTargetLevel', 'target level');
+    const description = getValidatedActionTextField('modalActionDescription', 'Action description', ACTION_FIELD_LIMITS.description);
+    const owner = getValidatedActionTextField('modalActionOwner', 'Owner', ACTION_FIELD_LIMITS.owner);
+    const timeline = getValidatedActionTextField('modalActionTimeline', 'Timeline', ACTION_FIELD_LIMITS.timeline);
+    const resources = getValidatedActionTextField('modalActionResources', 'Resources', ACTION_FIELD_LIMITS.resources);
     
     if (!requirementId) {
         alert('Please select a requirement');
+        return;
+    }
+
+    if (!ACTION_PRIORITIES.includes(priority)) {
+        alert('Please select a valid priority.');
+        return;
+    }
+
+    if (!isValidActionRequirementId(requirementId)) {
+        alert('Please select a valid requirement.');
+        return;
+    }
+
+    if ([currentLevel, targetLevel, description, owner, timeline, resources].includes(null)) {
         return;
     }
     
