@@ -349,20 +349,122 @@ function closeAllModals() {
     });
 }
 
-// Save Action
-function saveAction(e) {
-    e.preventDefault();
+
+
+// Populate Modal Action Requirement Select
+function populateModalActionRequirementSelect() {
+    const select = document.getElementById('modalActionRequirement');
+    select.innerHTML = '<option value="">Select Requirement</option>';
     
+    const allRequirements = [...RequirementsData.part1, ...RequirementsData.part2];
+    allRequirements.forEach(req => {
+        const option = document.createElement('option');
+        option.value = req.id;
+        option.textContent = `${req.id} - ${req.title}`;
+        select.appendChild(option);
+    });
+}
+
+// Update Current/Target Levels from Assessment
+function updateLevelsFromAssessment() {
+    const requirementId = document.getElementById('modalActionRequirement').value;
+    if (!requirementId || !AppState.currentAssessment) return;
+    
+    const reqData = AppState.currentAssessment.requirements[requirementId];
+    if (reqData) {
+        const currentLevel = reqData.currentLevel;
+        const targetLevel = reqData.targetLevel;
+        
+        if (currentLevel !== null) {
+            document.getElementById('modalActionCurrentLevel').value = currentLevel;
+        }
+        if (targetLevel !== null) {
+            document.getElementById('modalActionTargetLevel').value = targetLevel;
+        }
+    }
+}
+
+// Show Action Modal
+function showActionModal(actionId) {
+    const modal = document.getElementById('actionModal');
+    modal.classList.add('active');
+    
+    // Populate requirement select
+    populateModalActionRequirementSelect();
+    
+    // Add event listener for requirement change (remove old one first to avoid duplicates)
+    const requirementSelect = document.getElementById('modalActionRequirement');
+    requirementSelect.onchange = updateLevelsFromAssessment;
+    
+    if (actionId) {
+        // Editing existing action
+        const action = AppState.currentAssessment.actions.find(a => a.id === actionId);
+        if (action) {
+            AppState.editingAction = action;
+            document.getElementById('actionModalTitle').textContent = 'Edit Action';
+            document.getElementById('modalActionPriority').value = action.priority;
+            document.getElementById('modalActionRequirement').value = action.requirementId;
+            
+            // Get requirement data from assessment
+            const reqData = AppState.currentAssessment.requirements[action.requirementId];
+            const inheritedCurrentLevel = reqData ? reqData.currentLevel : null;
+            const inheritedTargetLevel = reqData ? reqData.targetLevel : null;
+            
+            // Use action levels if set, otherwise use inherited from assessment
+            document.getElementById('modalActionCurrentLevel').value = 
+                action.currentLevel !== null && action.currentLevel !== undefined 
+                    ? action.currentLevel 
+                    : (inheritedCurrentLevel !== null ? inheritedCurrentLevel : 0);
+            document.getElementById('modalActionTargetLevel').value = 
+                action.targetLevel !== null && action.targetLevel !== undefined 
+                    ? action.targetLevel 
+                    : (inheritedTargetLevel !== null ? inheritedTargetLevel : 4);
+            
+            document.getElementById('modalActionDescription').value = action.description;
+            document.getElementById('modalActionOwner').value = action.owner || '';
+            document.getElementById('modalActionTimeline').value = action.timeline || '';
+            document.getElementById('modalActionResources').value = action.resources || '';
+            
+            // Show delete button
+            document.getElementById('deleteActionModalBtn').style.display = 'inline-block';
+        }
+    } else {
+        // Adding new action
+        AppState.editingAction = null;
+        document.getElementById('actionModalTitle').textContent = 'Add Action';
+        document.getElementById('modalActionPriority').value = 'urgent';
+        document.getElementById('modalActionRequirement').value = '';
+        document.getElementById('modalActionCurrentLevel').value = '0';
+        document.getElementById('modalActionTargetLevel').value = '4';
+        document.getElementById('modalActionDescription').value = '';
+        document.getElementById('modalActionOwner').value = '';
+        document.getElementById('modalActionTimeline').value = '';
+        document.getElementById('modalActionResources').value = '';
+        
+        // Hide delete button
+        document.getElementById('deleteActionModalBtn').style.display = 'none';
+    }
+}
+
+// Hide Action Modal
+function hideActionModal() {
+    const modal = document.getElementById('actionModal');
+    modal.classList.remove('active');
+    AppState.editingAction = null;
+}
+
+// Save Action from Modal
+function saveActionFromModal() {
     if (!AppState.currentAssessment) return;
     
-    const priority = document.getElementById('actionPriority').value;
-    const requirementId = document.getElementById('actionRequirement').value;
-    const currentLevel = parseInt(document.getElementById('actionCurrentLevel').value);
-    const targetLevel = parseInt(document.getElementById('actionTargetLevel').value);
-    const description = document.getElementById('actionDescription').value;
-    const owner = document.getElementById('actionOwner').value;
-    const timeline = document.getElementById('actionTimeline').value;
-    const resources = document.getElementById('actionResources').value;
+    const priority = document.getElementById('modalActionPriority').value;
+    const requirementId = document.getElementById('modalActionRequirement').value;
+    const currentLevel = parseInt(document.getElementById('modalActionCurrentLevel').value);
+    const targetLevel = parseInt(document.getElementById('modalActionTargetLevel').value);
+    const description = document.getElementById('modalActionDescription').value;
+    const owner = document.getElementById('modalActionOwner').value;
+    const timeline = document.getElementById('modalActionTimeline').value;
+    const resources = document.getElementById('modalActionResources').value;
     
     if (!requirementId) {
         alert('Please select a requirement');
@@ -398,34 +500,42 @@ function saveAction(e) {
         AppState.currentAssessment.actions.push(action);
     }
     
+    // Update the assessment requirement with the current/target levels from the action
+    // This ensures two-way sync: editing in roadmap updates the assessment
+    if (AppState.currentAssessment.requirements[requirementId]) {
+        AppState.currentAssessment.requirements[requirementId].currentLevel = currentLevel;
+        AppState.currentAssessment.requirements[requirementId].targetLevel = targetLevel;
+        AppState.currentAssessment.requirements[requirementId].lastUpdated = new Date().toISOString();
+    }
+    
     AppState.currentAssessment.updatedAt = new Date().toISOString();
     saveAssessment();
     
-    hideActionForm();
+    hideActionModal();
     renderRoadmap();
 }
 
-// Show Action Form
-function showActionForm() {
-    document.getElementById('actionForm').style.display = 'block';
-    document.getElementById('addActionBtn').style.display = 'none';
+// Delete Action
+function deleteAction(actionId) {
+    if (!AppState.currentAssessment || !actionId) return;
     
-    // Reset form
-    document.getElementById('actionPriority').value = 'urgent';
-    document.getElementById('actionRequirement').value = '';
-    document.getElementById('actionCurrentLevel').value = '0';
-    document.getElementById('actionTargetLevel').value = '4';
-    document.getElementById('actionDescription').value = '';
-    document.getElementById('actionOwner').value = '';
-    document.getElementById('actionTimeline').value = '';
-    document.getElementById('actionResources').value = '';
-    
-    AppState.editingAction = null;
+    const index = AppState.currentAssessment.actions.findIndex(a => a.id === actionId);
+    if (index >= 0) {
+        AppState.currentAssessment.actions.splice(index, 1);
+        AppState.currentAssessment.updatedAt = new Date().toISOString();
+        saveAssessment();
+        renderRoadmap();
+    }
 }
 
-// Hide Action Form
-function hideActionForm() {
-    document.getElementById('actionForm').style.display = 'none';
-    document.getElementById('addActionBtn').style.display = 'inline-block';
-    AppState.editingAction = null;
+// Confirm Delete Action
+function confirmDeleteAction(actionId) {
+    if (confirm('Are you sure you want to delete this action?')) {
+        deleteAction(actionId);
+    }
+}
+
+// Edit Action
+function editAction(actionId) {
+    showActionModal(actionId);
 }

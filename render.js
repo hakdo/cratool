@@ -423,9 +423,6 @@ function renderRoadmap() {
     
     // Render Actions Table
     renderActionsTable();
-    
-    // Populate Action Form Requirements
-    populateActionRequirementSelect();
 }
 
 // Render Priority Matrix
@@ -513,7 +510,7 @@ function renderActionsTable() {
     tbody.innerHTML = '';
     
     if (!AppState.currentAssessment.actions || AppState.currentAssessment.actions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="empty-message">No actions defined yet</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="empty-message">No actions defined yet</td></tr>';
         return;
     }
     
@@ -521,14 +518,31 @@ function renderActionsTable() {
         const req = findRequirementById(action.requirementId);
         if (!req) return;
         
+        // Get the requirement data from assessment to show inherited levels
+        const reqData = AppState.currentAssessment.requirements[action.requirementId];
+        const inheritedCurrentLevel = reqData ? reqData.currentLevel : null;
+        const inheritedTargetLevel = reqData ? reqData.targetLevel : null;
+        
+        // Use action levels if set, otherwise show inherited from assessment
+        const displayCurrentLevel = action.currentLevel !== null && action.currentLevel !== undefined 
+            ? action.currentLevel 
+            : (inheritedCurrentLevel !== null ? inheritedCurrentLevel : 'N/A');
+        const displayTargetLevel = action.targetLevel !== null && action.targetLevel !== undefined 
+            ? action.targetLevel 
+            : (inheritedTargetLevel !== null ? inheritedTargetLevel : 'N/A');
+        
         const row = document.createElement('tr');
         row.innerHTML = `
             <td><span class="level-indicator level-${getPriorityValue(action.priority)}">${action.priority}</span></td>
             <td>${req.id} - ${req.title}</td>
-            <td>${action.currentLevel}</td>
-            <td>${action.targetLevel}</td>
+            <td>${displayCurrentLevel}</td>
+            <td>${displayTargetLevel}</td>
             <td>${action.description}</td>
             <td>${action.timeline || '-'}</td>
+            <td>
+                <button class="btn btn-small btn-primary" onclick="editAction('${action.id}')">Edit</button>
+                <button class="btn btn-small btn-danger" onclick="confirmDeleteAction('${action.id}')">Delete</button>
+            </td>
         `;
         tbody.appendChild(row);
     });
@@ -545,44 +559,6 @@ function getPriorityValue(priority) {
     return priorityMap[priority] || 2;
 }
 
-// Populate Action Requirement Select
-function populateActionRequirementSelect() {
-    const select = document.getElementById('actionRequirement');
-    select.innerHTML = '<option value="">Select Requirement</option>';
-    
-    const allRequirements = [...RequirementsData.part1, ...RequirementsData.part2];
-    allRequirements.forEach(req => {
-        const option = document.createElement('option');
-        option.value = req.id;
-        option.textContent = `${req.id} - ${req.title}`;
-        select.appendChild(option);
-    });
-}
-
-// Show Action Form
-function showActionForm() {
-    document.getElementById('actionForm').style.display = 'block';
-    document.getElementById('addActionBtn').style.display = 'none';
-    
-    // Reset form
-    document.getElementById('actionPriority').value = 'urgent';
-    document.getElementById('actionRequirement').value = '';
-    document.getElementById('actionCurrentLevel').value = '0';
-    document.getElementById('actionTargetLevel').value = '4';
-    document.getElementById('actionDescription').value = '';
-    document.getElementById('actionOwner').value = '';
-    document.getElementById('actionTimeline').value = '';
-    document.getElementById('actionResources').value = '';
-    
-    AppState.editingAction = null;
-}
-
-// Hide Action Form
-function hideActionForm() {
-    document.getElementById('actionForm').style.display = 'none';
-    document.getElementById('addActionBtn').style.display = 'inline-block';
-    AppState.editingAction = null;
-}
 
 // Render History
 function renderHistory() {

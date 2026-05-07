@@ -373,85 +373,18 @@
                                         <th>Target Level</th>
                                         <th>Action</th>
                                         <th>Timeline</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody id="actionsTableBody">
                                     <tr>
-                                        <td colspan="6" class="empty-message">No actions defined yet</td>
+                                        <td colspan="7" class="empty-message">No actions defined yet</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         <button id="addActionBtn" class="btn btn-primary">Add Action</button>
                     </div>
-                </div>
-                
-                <div class="card">
-                    <h3>Action Item Form</h3>
-                    <form id="actionForm" class="action-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="actionPriority">Priority</label>
-                                <select id="actionPriority">
-                                    <option value="urgent">Urgent</option>
-                                    <option value="high">High</option>
-                                    <option value="medium">Medium</option>
-                                    <option value="low">Low</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="actionRequirement">Requirement</label>
-                                <select id="actionRequirement">
-                                    <option value="">Select Requirement</option>
-                                    <!-- Will be populated dynamically -->
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="actionCurrentLevel">Current Level</label>
-                                <select id="actionCurrentLevel">
-                                    <option value="0">0 - Non-existent</option>
-                                    <option value="1">1 - Initial</option>
-                                    <option value="2">2 - Managed</option>
-                                    <option value="3">3 - Defined</option>
-                                    <option value="4">4 - Optimized</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="actionTargetLevel">Target Level</label>
-                                <select id="actionTargetLevel">
-                                    <option value="0">0 - Non-existent</option>
-                                    <option value="1">1 - Initial</option>
-                                    <option value="2">2 - Managed</option>
-                                    <option value="3">3 - Defined</option>
-                                    <option value="4">4 - Optimized</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="actionDescription">Action Description</label>
-                            <textarea id="actionDescription" placeholder="Describe the action to be taken"></textarea>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="actionOwner">Owner</label>
-                                <input type="text" id="actionOwner" placeholder="Who is responsible?">
-                            </div>
-                            <div class="form-group">
-                                <label for="actionTimeline">Timeline</label>
-                                <input type="text" id="actionTimeline" placeholder="e.g., 3-6 months">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="actionResources">Resources Required</label>
-                            <input type="text" id="actionResources" placeholder="What resources are needed?">
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-primary">Save Action</button>
-                            <button type="button" id="cancelActionBtn" class="btn btn-secondary">Cancel</button>
-                        </div>
-                    </form>
                 </div>
             </section>
 
@@ -544,6 +477,83 @@
             </div>
             <div class="modal-footer">
                 <button id="loadSelectedBtn" class="btn btn-primary">Load Selected</button>
+                <button class="modal-close btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Modal -->
+    <div id="actionModal" class="modal">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h2 id="actionModalTitle">Add/Edit Action</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="modalActionForm" class="action-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalActionPriority">Priority</label>
+                            <select id="modalActionPriority" class="form-control">
+                                <option value="urgent">Urgent</option>
+                                <option value="high">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="low">Low</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="modalActionRequirement">Requirement</label>
+                            <select id="modalActionRequirement" class="form-control">
+                                <option value="">Select Requirement</option>
+                                <!-- Will be populated dynamically -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalActionCurrentLevel">Current Level</label>
+                            <select id="modalActionCurrentLevel" class="form-control">
+                                <option value="0">0 - Non-existent</option>
+                                <option value="1">1 - Initial</option>
+                                <option value="2">2 - Managed</option>
+                                <option value="3">3 - Defined</option>
+                                <option value="4">4 - Optimized</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="modalActionTargetLevel">Target Level</label>
+                            <select id="modalActionTargetLevel" class="form-control">
+                                <option value="0">0 - Non-existent</option>
+                                <option value="1">1 - Initial</option>
+                                <option value="2">2 - Managed</option>
+                                <option value="3">3 - Defined</option>
+                                <option value="4">4 - Optimized</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalActionDescription">Action Description</label>
+                        <textarea id="modalActionDescription" class="form-control" placeholder="Describe the action to be taken"></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="modalActionOwner">Owner</label>
+                            <input type="text" id="modalActionOwner" class="form-control" placeholder="Who is responsible?">
+                        </div>
+                        <div class="form-group">
+                            <label for="modalActionTimeline">Timeline</label>
+                            <input type="text" id="modalActionTimeline" class="form-control" placeholder="e.g., 3-6 months">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalActionResources">Resources Required</label>
+                        <input type="text" id="modalActionResources" class="form-control" placeholder="What resources are needed?">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="saveActionModalBtn" class="btn btn-primary">Save Action</button>
+                <button id="deleteActionModalBtn" class="btn btn-danger" style="display: none;">Delete Action</button>
                 <button class="modal-close btn btn-secondary">Cancel</button>
             </div>
         </div>
