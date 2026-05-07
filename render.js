@@ -432,10 +432,19 @@ function renderPriorityMatrix() {
     const allRequirements = [...RequirementsData.part1, ...RequirementsData.part2];
     
     // Clear existing actions
-    document.getElementById('urgentActions').innerHTML = '<li class="empty-message">No urgent actions identified</li>';
-    document.getElementById('highActions').innerHTML = '<li class="empty-message">No high priority actions identified</li>';
-    document.getElementById('mediumActions').innerHTML = '<li class="empty-message">No medium priority actions identified</li>';
-    document.getElementById('lowActions').innerHTML = '<li class="empty-message">No low priority actions identified</li>';
+    [
+        ['urgentActions', 'No urgent actions identified'],
+        ['highActions', 'No high priority actions identified'],
+        ['mediumActions', 'No medium priority actions identified'],
+        ['lowActions', 'No low priority actions identified']
+    ].forEach(([listId, message]) => {
+        const list = document.getElementById(listId);
+        list.replaceChildren();
+        const emptyItem = document.createElement('li');
+        emptyItem.className = 'empty-message';
+        emptyItem.textContent = message;
+        list.appendChild(emptyItem);
+    });
     
     // Check if we have actions defined
     if (AppState.currentAssessment.actions && AppState.currentAssessment.actions.length > 0) {
@@ -448,16 +457,24 @@ function renderPriorityMatrix() {
             
             if (list) {
                 // Check if we need to remove empty message
-                if (list.innerHTML.includes('empty-message')) {
-                    list.innerHTML = '';
+                if (list.querySelector('.empty-message')) {
+                    list.replaceChildren();
                 }
                 
                 const li = document.createElement('li');
-                li.innerHTML = `
-                    <strong>${req.id}: ${req.title}</strong><br>
-                    <small>Current: ${action.currentLevel} → Target: ${action.targetLevel}</small><br>
-                    <small>${action.description}</small>
-                `;
+                const title = document.createElement('strong');
+                title.textContent = `${req.id}: ${req.title}`;
+                li.appendChild(title);
+                li.appendChild(document.createElement('br'));
+
+                const levels = document.createElement('small');
+                levels.textContent = `Current: ${action.currentLevel} → Target: ${action.targetLevel}`;
+                li.appendChild(levels);
+                li.appendChild(document.createElement('br'));
+
+                const description = document.createElement('small');
+                description.textContent = action.description || 'No description provided';
+                li.appendChild(description);
                 list.appendChild(li);
             }
         });
@@ -473,17 +490,25 @@ function renderPriorityMatrix() {
             
             if (list) {
                 // Check if we need to remove empty message
-                if (list.innerHTML.includes('empty-message')) {
-                    list.innerHTML = '';
+                if (list.querySelector('.empty-message')) {
+                    list.replaceChildren();
                 }
                 
                 const li = document.createElement('li');
                 const gap = (reqData.targetLevel || 4) - reqData.currentLevel;
-                li.innerHTML = `
-                    <strong>${req.id}: ${req.title}</strong><br>
-                    <small>Current: ${reqData.currentLevel} → Target: ${reqData.targetLevel || 4}</small><br>
-                    <small>Improve maturity by ${gap} levels</small>
-                `;
+                const title = document.createElement('strong');
+                title.textContent = `${req.id}: ${req.title}`;
+                li.appendChild(title);
+                li.appendChild(document.createElement('br'));
+
+                const levels = document.createElement('small');
+                levels.textContent = `Current: ${reqData.currentLevel} → Target: ${reqData.targetLevel || 4}`;
+                li.appendChild(levels);
+                li.appendChild(document.createElement('br'));
+
+                const improvement = document.createElement('small');
+                improvement.textContent = `Improve maturity by ${gap} levels`;
+                li.appendChild(improvement);
                 list.appendChild(li);
             }
         });
@@ -507,10 +532,16 @@ function renderActionsTable() {
     if (!AppState.currentAssessment) return;
     
     const tbody = document.getElementById('actionsTableBody');
-    tbody.innerHTML = '';
+    tbody.replaceChildren();
     
     if (!AppState.currentAssessment.actions || AppState.currentAssessment.actions.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="empty-message">No actions defined yet</td></tr>';
+        const emptyRow = document.createElement('tr');
+        const emptyCell = document.createElement('td');
+        emptyCell.colSpan = 7;
+        emptyCell.className = 'empty-message';
+        emptyCell.textContent = 'No actions defined yet';
+        emptyRow.appendChild(emptyCell);
+        tbody.appendChild(emptyRow);
         return;
     }
     
@@ -532,18 +563,50 @@ function renderActionsTable() {
             : (inheritedTargetLevel !== null ? inheritedTargetLevel : 'N/A');
         
         const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><span class="level-indicator level-${getPriorityValue(action.priority)}">${action.priority}</span></td>
-            <td>${req.id} - ${req.title}</td>
-            <td>${displayCurrentLevel}</td>
-            <td>${displayTargetLevel}</td>
-            <td>${action.description}</td>
-            <td>${action.timeline || '-'}</td>
-            <td>
-                <button class="btn btn-small btn-primary" onclick="editAction('${action.id}')">Edit</button>
-                <button class="btn btn-small btn-danger" onclick="confirmDeleteAction('${action.id}')">Delete</button>
-            </td>
-        `;
+        const priorityCell = document.createElement('td');
+        const priorityIndicator = document.createElement('span');
+        priorityIndicator.className = `level-indicator level-${getPriorityValue(action.priority)}`;
+        priorityIndicator.textContent = action.priority;
+        priorityCell.appendChild(priorityIndicator);
+        row.appendChild(priorityCell);
+
+        const requirementCell = document.createElement('td');
+        requirementCell.textContent = `${req.id} - ${req.title}`;
+        row.appendChild(requirementCell);
+
+        const currentLevelCell = document.createElement('td');
+        currentLevelCell.textContent = displayCurrentLevel;
+        row.appendChild(currentLevelCell);
+
+        const targetLevelCell = document.createElement('td');
+        targetLevelCell.textContent = displayTargetLevel;
+        row.appendChild(targetLevelCell);
+
+        const descriptionCell = document.createElement('td');
+        descriptionCell.textContent = action.description || '';
+        row.appendChild(descriptionCell);
+
+        const timelineCell = document.createElement('td');
+        timelineCell.textContent = action.timeline || '-';
+        row.appendChild(timelineCell);
+
+        const actionsCell = document.createElement('td');
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'btn btn-small btn-primary';
+        editButton.textContent = 'Edit';
+        editButton.addEventListener('click', () => editAction(action.id));
+        actionsCell.appendChild(editButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'btn btn-small btn-danger';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => confirmDeleteAction(action.id));
+        actionsCell.appendChild(document.createTextNode(' '));
+        actionsCell.appendChild(deleteButton);
+        row.appendChild(actionsCell);
+
         tbody.appendChild(row);
     });
 }
